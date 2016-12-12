@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 import os
+
 os.environ["PATH"] += ":{}".format(os.path.abspath("./lib"))
 
 from selenium import webdriver
@@ -10,6 +11,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
+from PIL import Image
+from io import BytesIO
 
 
 # 定义选择方式
@@ -81,9 +84,10 @@ class Action:
 
         if not (img_name.endswith(".png") or img_name.endswith(".jpg") or img_name.endswith(".git")):
             img_name = "{}.png".format(img_name)
-        img_path = os.path.join(path, img_name)
-        print("Image saved at {}".format(img_path))
-        self.browser.get_screenshot_as_file(img_path)
+        img_path = os.path.abspath(os.path.join(path, img_name))
+        # print("Image saved at {}".format(img_path))
+        # self.browser.get_screenshot_as_file(img_path)
+        get_scroll_screenshot(self.browser, img_path)
 
     # 等待
     def waiting(self, selector_type, descriptor, timeout):
@@ -96,3 +100,37 @@ class Action:
     def __exit__(self, exc_type, exc_val, exc_tb):
         # 重复quit不会出错
         self.end()
+
+
+# 滚动截图
+def get_scroll_screenshot(browser, img_path):
+    # 整个页面的高度
+    whole_page_height = browser.execute_script("return document.body.clientHeight;")
+    # 当前窗口页面高度
+    single_window_height = browser.execute_script("return window.innerHeight;")
+
+    # 截图，保存为bytes格式数据
+    raw_pngs = []
+    cur_height = 0
+    browser.execute_script("window.scrollTo(0, {});".format(cur_height))
+    raw_pngs.append(browser.get_screenshot_as_png())
+    img_first = Image.open(BytesIO(raw_pngs[0]))
+    single_size = img_first.size
+    cur_height += single_window_height
+    while cur_height <= whole_page_height:
+        browser.execute_script("window.scrollTo(0, {});".format(cur_height))
+        raw_pngs.append(browser.get_screenshot_as_png())
+        cur_height += single_window_height
+
+    # 将所有截图合并
+    img_all = Image.new("RGB", (single_size[0], single_size[1] * len(raw_pngs)))
+    height_shift = 0
+    img_all.paste(img_first, (0, height_shift))
+    for raw_png in raw_pngs[1:]:
+        height_shift += single_size[1]
+        img_tmp = Image.open(BytesIO(raw_png))
+        img_all.paste(img_tmp, (0, height_shift))
+    # img_all.show()
+    # 保存为文件
+    img_all.save(img_path, format="png")
+    print("Image saved at {}".format(img_path))

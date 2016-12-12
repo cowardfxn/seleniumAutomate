@@ -19,3 +19,7 @@ Automated selenium test framework
 Run command `python start.py` will automatically read scenario definition files in directory "Scenarios",
 execute scenarios sequentially. If saving screenshot is ordered, screenshot will be saved in a directory
 named after the scenario file name in directory "target".
+
+v0.1 改动
+1. 添加滚动截图功能，如果页面长度超过屏幕显示，那么同一页面将会产生多张截图，然后被合并为一张进行存储。
+
