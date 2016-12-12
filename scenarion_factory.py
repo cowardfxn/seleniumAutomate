@@ -10,7 +10,9 @@ from time import sleep
 
 
 def usercase_proc(filename):
-    wb = load_workbook(filename=filename)
+    # Additional keyword args(read_only, data_only) to avoid warning messages
+    wb = load_workbook(filename=filename, read_only=True, data_only=True)
+
     ws = wb.worksheets[0]
     lines = list(ws.rows)
     START_POS = (4, 3)

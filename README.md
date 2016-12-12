@@ -10,6 +10,7 @@ Automated selenium test framework
  - chromedriver
  - openpyxl
  - Chrome 52.0+ or Firefox
+ - pillow
 
 ## 说明 Description
 运行 `python start.py`启动测试

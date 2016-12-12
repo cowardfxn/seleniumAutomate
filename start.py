@@ -15,5 +15,6 @@ def run_test():
             usercase_proc(filename)
             print("Process of scenario file {} ends at {}".format(filename, strftime(time_format, localtime())))
 
+
 if __name__ == "__main__":
     run_test()
